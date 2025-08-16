@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediSum - Medical Report Summarizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #0F172A 0%, #1E40AF 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .feature-gradient {
+            background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
+        }
+        .card-hover {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 30px -12px rgba(0, 0, 0, 0.15);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .animate-float {
+            animation: float 8s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .feature-icon {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover .feature-icon {
+            transform: scale(1.2) rotate(5deg);
+        }
+        .stats-gradient {
+            background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .stats-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+        .testimonial-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .testimonial-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 30px -12px rgba(0, 0, 0, 0.15);
+        }
+        .pulse-animation {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .shine-effect {
+            position: relative;
+            overflow: hidden;
+        }
+        .shine-effect::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to right,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.3) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: rotate(30deg);
+            animation: shine 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(30deg); }
+            100% { transform: translateX(100%) rotate(30deg); }
+        }
+        .gradient-border {
+            position: relative;
+            background: linear-gradient(white, white) padding-box,
+                        linear-gradient(135deg, #60A5FA, #3B82F6) border-box;
+            border: 2px solid transparent;
+            border-radius: 1rem;
+        }
+        .hover-glow:hover {
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
+        }
+        .scroll-indicator {
+            animation: bounce 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+        .nav-blur {
+            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.8);
+        }
+        .nav-blur.dark {
+            background: rgba(15, 23, 42, 0.8);
+        }
+        .parallax {
+            transform: translateZ(-1px) scale(2);
+        }
+        .typing-animation {
+            overflow: hidden;
+            border-right: 2px solid #3B82F6;
+            white-space: nowrap;
+            animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: #3B82F6 }
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1E40AF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% 200%;
+            animation: gradient 5s ease infinite;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .morph {
+            border-radius: 60% 40% 30% 70%/60% 30% 70% 40%;
+            transition: all 1s ease-in-out;
+            animation: morph 8s ease-in-out infinite;
+        }
+        @keyframes morph {
+            0% { border-radius: 60% 40% 30% 70%/60% 30% 70% 40%; }
+            50% { border-radius: 30% 60% 70% 40%/50% 60% 30% 60%; }
+            100% { border-radius: 60% 40% 30% 70%/60% 30% 70% 40%; }
+        }
+        .tilt {
+            transform-style: preserve-3d;
+            transform: perspective(1000px);
+        }
+        .tilt-content {
+            transform: translateZ(20px);
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <!-- Navigation -->
+    <nav class="nav-blur fixed w-full z-50 shadow-lg transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-file-medical text-blue-600 text-2xl mr-2"></i>
+                        <span class="text-2xl font-bold gradient-text">MediSum</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="#features" class="text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-all duration-300 hover:scale-110">Features</a>
+                    <a href="#how-it-works" class="text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-all duration-300 hover:scale-110">How It Works</a>
+                    <a href="/summarize" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl hover-glow hover:scale-105">
+                        <i class="fas fa-rocket mr-2"></i>
+                        Get Started
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-gradient pt-24 overflow-hidden">
+        <div class="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8 relative">
+            <!-- Animated background elements -->
+            <div class="absolute inset-0 overflow-hidden">
+                <div class="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl animate-float"></div>
+                <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl animate-float" style="animation-delay: -3s"></div>
+                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-float" style="animation-delay: -1.5s"></div>
+                <div class="absolute top-1/4 right-1/4 w-64 h-64 bg-pink-500/10 rounded-full blur-3xl animate-float" style="animation-delay: -2s"></div>
+            </div>
+            
+            <div class="text-center relative">
+                <div class="inline-block mb-4">
+                    <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                        <i class="fas fa-star mr-2"></i>
+                        Trusted by Healthcare Professionals
+                    </span>
+                </div>
+                <h1 class="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-6xl">
+                    <span class="block typing-animation">Transform Medical Reports</span>
+                    <span class="block text-blue-200 mt-2 gradient-text">with AI-Powered Summarization</span>
+                </h1>
+                <p class="mt-6 max-w-2xl mx-auto text-xl text-blue-100">
+                    Extract key information, generate concise summaries, and export in multiple formats. Save time and improve efficiency in medical documentation.
+                </p>
+                <div class="mt-8 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
+                    <div class="rounded-full shadow-lg pulse-animation shine-effect hover:scale-105 transition-all duration-300">
+                        <a href="/summarize" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-full text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 md:py-4 md:text-lg md:px-10">
+                            <i class="fas fa-magic mr-2"></i>
+                            Try Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Scroll Indicator -->
+            <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white scroll-indicator">
+                <i class="fas fa-chevron-down text-2xl"></i>
+            </div>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-slate-50 to-transparent"></div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="stats-gradient py-12 relative overflow-hidden">
+        <div class="absolute inset-0 bg-grid-white/10"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="text-center gradient-border p-6 bg-white/10 backdrop-blur-sm hover:scale-105 transition-all duration-300">
+                    <div class="text-4xl font-bold text-white mb-2 gradient-text">98%</div>
+                    <div class="text-blue-100">Accuracy Rate</div>
+                </div>
+                <div class="text-center gradient-border p-6 bg-white/10 backdrop-blur-sm hover:scale-105 transition-all duration-300">
+                    <div class="text-4xl font-bold text-white mb-2 gradient-text">10k+</div>
+                    <div class="text-blue-100">Reports Processed</div>
+                </div>
+                <div class="text-center gradient-border p-6 bg-white/10 backdrop-blur-sm hover:scale-105 transition-all duration-300">
+                    <div class="text-4xl font-bold text-white mb-2 gradient-text">50%</div>
+                    <div class="text-blue-100">Time Saved</div>
+                </div>
+                <div class="text-center gradient-border p-6 bg-white/10 backdrop-blur-sm hover:scale-105 transition-all duration-300">
+                    <div class="text-4xl font-bold text-white mb-2 gradient-text">24/7</div>
+                    <div class="text-blue-100">Support Available</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div id="features" class="py-16 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-base font-semibold text-blue-600 tracking-wide uppercase">Features</h2>
+                <p class="mt-2 text-3xl font-extrabold text-gray-900 sm:text-4xl gradient-text">
+                    Everything you need to process medical reports
+                </p>
+            </div>
+
+            <div class="mt-12">
+                <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-2">
+                    <!-- Feature 1 -->
+                    <div class="card-hover relative bg-white p-8 rounded-2xl shadow-lg border border-slate-100 hover-glow tilt">
+                        <div class="feature-icon text-blue-600 text-3xl mb-4">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div class="text-lg font-semibold text-gray-900 mb-2 gradient-text">Smart Summarization</div>
+                        <p class="text-gray-600">
+                            Advanced NLP algorithms extract the most important information from medical reports, providing concise and accurate summaries.
+                        </p>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="card-hover relative bg-white p-8 rounded-2xl shadow-lg border border-slate-100 hover-glow tilt">
+                        <div class="feature-icon text-blue-600 text-3xl mb-4">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="text-lg font-semibold text-gray-900 mb-2 gradient-text">Multiple Format Support</div>
+                        <p class="text-gray-600">
+                            Upload and process various file formats including PDF, DOC, and text files. Export summaries in PDF and DOC formats.
+                        </p>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="card-hover relative bg-white p-8 rounded-2xl shadow-lg border border-slate-100 hover-glow tilt">
+                        <div class="feature-icon text-blue-600 text-3xl mb-4">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="text-lg font-semibold text-gray-900 mb-2 gradient-text">Key Information Extraction</div>
+                        <p class="text-gray-600">
+                            Automatically identify and categorize medical terms, diagnoses, medications, and procedures with confidence scores.
+                        </p>
+                    </div>
+
+                    <!-- Feature 4 -->
+                    <div class="card-hover relative bg-white p-8 rounded-2xl shadow-lg border border-slate-100 hover-glow tilt">
+                        <div class="feature-icon text-blue-600 text-3xl mb-4">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <div class="text-lg font-semibold text-gray-900 mb-2 gradient-text">History Tracking</div>
+                        <p class="text-gray-600">
+                            Keep track of all processed reports with timestamps and easy access to previous summaries.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Testimonials Section -->
+    <div class="bg-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-base font-semibold text-blue-600 tracking-wide uppercase">Testimonials</h2>
+                <p class="mt-2 text-3xl font-extrabold text-gray-900 sm:text-4xl gradient-text">
+                    What Our Users Say
+                </p>
+            </div>
+
+            <div class="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                <!-- Testimonial 1 -->
+                <div class="testimonial-card bg-white p-6 rounded-2xl shadow-lg border border-slate-100 hover-glow morph">
+                    <div class="flex items-center mb-4">
+                        <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-user-md text-blue-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-lg font-semibold text-gray-900 gradient-text">Dr. Sarah Johnson</div>
+                            <div class="text-sm text-gray-500">Cardiologist</div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">
+                        "MediSum has revolutionized how I handle patient reports. The AI-powered summarization saves me hours every week."
+                    </p>
+                </div>
+
+                <!-- Testimonial 2 -->
+                <div class="testimonial-card bg-white p-6 rounded-2xl shadow-lg border border-slate-100 hover-glow morph">
+                    <div class="flex items-center mb-4">
+                        <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-user-nurse text-blue-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-lg font-semibold text-gray-900 gradient-text">Nurse Emily Chen</div>
+                            <div class="text-sm text-gray-500">ICU Nurse</div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">
+                        "The accuracy of the summaries is impressive. It helps me quickly understand patient histories and make better decisions."
+                    </p>
+                </div>
+
+                <!-- Testimonial 3 -->
+                <div class="testimonial-card bg-white p-6 rounded-2xl shadow-lg border border-slate-100 hover-glow morph">
+                    <div class="flex items-center mb-4">
+                        <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-hospital text-blue-600 text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-lg font-semibold text-gray-900 gradient-text">Dr. Michael Brown</div>
+                            <div class="text-sm text-gray-500">Hospital Administrator</div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">
+                        "Implementing MediSum has significantly improved our hospital's efficiency in processing medical reports."
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works Section -->
+    <div id="how-it-works" class="bg-slate-50 py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-base font-semibold text-blue-600 tracking-wide uppercase">How It Works</h2>
+                <p class="mt-2 text-3xl font-extrabold text-gray-900 sm:text-4xl gradient-text">
+                    Simple and Efficient Process
+                </p>
+            </div>
+
+            <div class="mt-12">
+                <div class="grid grid-cols-1 gap-8 sm:grid-cols-3">
+                    <!-- Step 1 -->
+                    <div class="relative">
+                        <div class="absolute flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold shadow-lg hover-glow hover:scale-110 transition-all duration-300">
+                            <i class="fas fa-upload"></i>
+                        </div>
+                        <div class="ml-16">
+                            <h3 class="text-lg font-semibold text-gray-900 gradient-text">Upload Report</h3>
+                            <p class="mt-2 text-gray-600">
+                                Upload your medical report in PDF, DOC, or text format.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="relative">
+                        <div class="absolute flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold shadow-lg hover-glow hover:scale-110 transition-all duration-300">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <div class="ml-16">
+                            <h3 class="text-lg font-semibold text-gray-900 gradient-text">Process</h3>
+                            <p class="mt-2 text-gray-600">
+                                Our AI analyzes the content and extracts key information.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="relative">
+                        <div class="absolute flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold shadow-lg hover-glow hover:scale-110 transition-all duration-300">
+                            <i class="fas fa-file-export"></i>
+                        </div>
+                        <div class="ml-16">
+                            <h3 class="text-lg font-semibold text-gray-900 gradient-text">Get Results</h3>
+                            <p class="mt-2 text-gray-600">
+                                View the summary and export in your preferred format.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="bg-gradient-to-r from-blue-600 to-blue-700 relative overflow-hidden">
+        <div class="absolute inset-0 bg-grid-white/10"></div>
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center lg:justify-between relative">
+            <h2 class="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+                <span class="block">Ready to get started?</span>
+                <span class="block text-blue-100 mt-2 gradient-text">Try MediSum today.</span>
+            </h2>
+            <div class="mt-8 flex lg:mt-0 lg:flex-shrink-0">
+                <div class="inline-flex rounded-full shadow-lg shine-effect hover:scale-105 transition-all duration-300">
+                    <a href="/summarize" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-full text-blue-600 bg-white hover:bg-blue-50 transition-all duration-300 hover-glow">
+                        <i class="fas fa-rocket mr-2"></i>
+                        Get Started
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <div class="flex items-center">
+                        <i class="fas fa-file-medical text-blue-500 text-2xl mr-2"></i>
+                        <span class="text-2xl font-bold gradient-text">MediSum</span>
+                    </div>
+                    <p class="mt-4 text-gray-400">
+                        AI-powered medical report summarization for healthcare professionals.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">Quick Links</h3>
+                    <ul class="mt-4 space-y-4">
+                        <li>
+                            <a href="/" class="text-base text-gray-300 hover:text-white transition-all duration-300 hover:scale-110 inline-block">
+                                Home
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/summarize" class="text-base text-gray-300 hover:text-white transition-all duration-300 hover:scale-110 inline-block">
+                                Summarize
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#features" class="text-base text-gray-300 hover:text-white transition-all duration-300 hover:scale-110 inline-block">
+                                Features
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#how-it-works" class="text-base text-gray-300 hover:text-white transition-all duration-300 hover:scale-110 inline-block">
+                                How It Works
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">Contact</h3>
+                    <ul class="mt-4 space-y-4">
+                        <li>
+                            <a href="#" class="text-base text-gray-300 hover:text-white transition-all duration-300 hover:scale-110 inline-block">
+                                <i class="fas fa-envelope mr-2"></i>
+                                support@medisum.com
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-base text-gray-300 hover:text-white transition-all duration-300 hover:scale-110 inline-block">
+                                <i class="fas fa-phone mr-2"></i>
+                                +1 (555) 123-4567
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-base text-gray-300 hover:text-white transition-all duration-300 hover:scale-110 inline-block">
+                                <i class="fas fa-map-marker-alt mr-2"></i>
+                                123 Medical Center Dr.
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-8 border-t border-gray-800 pt-8">
+                <p class="text-base text-gray-400 text-center">
+                    &copy; 2024 MediSum. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Add scroll event listener for navbar background
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('dark');
+            } else {
+                nav.classList.remove('dark');
+            }
+        });
+
+        // Add tilt effect to cards
+        document.querySelectorAll('.tilt').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = (y - centerY) / 10;
+                const rotateY = (centerX - x) / 10;
+                
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+            });
+        });
+    </script>
+</body>
+</html> 

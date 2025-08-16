@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediSum - Summarize</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .nav-blur {
+            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+        }
+        .nav-blur.dark {
+            background: rgba(15, 23, 42, 0.8);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #1E40AF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% 200%;
+            animation: gradient 5s ease infinite;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .hover-glow:hover {
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
+        }
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        .nav-link.active::after {
+            width: 100%;
+        }
+        .highlight-diagnosis { background-color: #FEE2E2; }
+        .highlight-medication { background-color: #DCFCE7; }
+        .highlight-procedure { background-color: #E0E7FF; }
+        .highlight-symptom { background-color: #FEF3C7; }
+        .highlight-test { background-color: #F3E8FF; }
+        .mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .mobile-menu.open {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <!-- Navigation -->
+    <nav class="nav-blur fixed w-full z-50 shadow-lg transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-file-medical text-blue-600 text-2xl mr-2"></i>
+                        <a href="/" class="text-2xl font-bold gradient-text hover:opacity-80 transition-opacity duration-300">MediSum</a>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="/" class="nav-link text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-all duration-300">
+                        <i class="fas fa-home mr-1"></i> Home
+                    </a>
+                    <a href="/summarize" class="nav-link active text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-all duration-300">
+                        <i class="fas fa-file-medical mr-1"></i> Summarize
+                    </a>
+                    <a href="/history" class="nav-link text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-all duration-300">
+                        <i class="fas fa-history mr-1"></i> History
+                    </a>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button onclick="toggleMobileMenu()" class="text-gray-600 hover:text-blue-600 focus:outline-none">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div id="mobile-menu" class="mobile-menu md:hidden fixed top-16 right-0 w-64 h-screen bg-white shadow-lg p-4">
+            <div class="flex flex-col space-y-4">
+                <a href="/" class="nav-link text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-all duration-300">
+                    <i class="fas fa-home mr-2"></i> Home
+                </a>
+                <a href="/summarize" class="nav-link active text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-all duration-300">
+                    <i class="fas fa-file-medical mr-2"></i> Summarize
+                </a>
+                <a href="/history" class="nav-link text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-all duration-300">
+                    <i class="fas fa-history mr-2"></i> History
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Medical Report Summarizer</h1>
+        
+        <div class="max-w-6xl mx-auto">
+            <!-- File Upload Section -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Upload Medical Report</h2>
+                <div class="flex items-center space-x-4">
+                    <label class="flex-1">
+                        <span class="sr-only">Choose file</span>
+                        <input type="file" id="file-upload" class="block w-full text-sm text-gray-500
+                            file:mr-4 file:py-2 file:px-4
+                            file:rounded-md file:border-0
+                            file:text-sm file:font-semibold
+                            file:bg-blue-50 file:text-blue-700
+                            hover:file:bg-blue-100"
+                            accept=".txt,.pdf,.doc,.docx">
+                    </label>
+                    <button onclick="uploadFile()" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+                        Upload
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Content Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Input Section -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="mb-6">
+                            <label for="medical-text" class="block text-sm font-medium text-gray-700 mb-2">Enter Medical Report Text:</label>
+                            <textarea id="medical-text" rows="10" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        </div>
+                        
+                        <button onclick="summarizeText()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            Generate Summary
+                        </button>
+                    </div>
+                </div>
+
+                <!-- History Section -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-semibold text-gray-800">History</h2>
+                            <button onclick="loadHistory()" class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                        <div id="history-list" class="space-y-4 max-h-[600px] overflow-y-auto">
+                            <!-- History items will be added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Loading Indicator -->
+            <div id="loading" class="hidden mt-4 text-center">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
+                <p class="mt-2 text-gray-600">Processing...</p>
+            </div>
+            
+            <!-- Results Section -->
+            <div id="results" class="hidden mt-6">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-semibold text-gray-800">Results</h2>
+                        <div class="flex space-x-2">
+                            <button onclick="exportCurrentSummary('pdf')" class="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700">
+                                Export as PDF
+                            </button>
+                            <button onclick="exportCurrentSummary('doc')" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+                                Export as DOC
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Highlighted Text -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium text-gray-700 mb-2">Highlighted Medical Terms</h3>
+                        <div id="highlighted-text" class="bg-gray-50 p-4 rounded-md prose max-w-none"></div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium text-gray-700 mb-2">Summary</h3>
+                        <div id="summary" class="bg-gray-50 p-4 rounded-md"></div>
+                    </div>
+                    
+                    <!-- Key Information -->
+                    <h3 class="text-lg font-medium text-gray-700 mb-4">Key Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-gray-50 p-4 rounded-md">
+                            <h4 class="font-medium text-gray-700 mb-2">Diagnosis</h4>
+                            <div id="diagnosis" class="text-gray-600"></div>
+                            <div id="diagnosis-confidence" class="text-sm text-gray-500 mt-2"></div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-md">
+                            <h4 class="font-medium text-gray-700 mb-2">Medications</h4>
+                            <div id="medications" class="text-gray-600"></div>
+                            <div id="medications-confidence" class="text-sm text-gray-500 mt-2"></div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-md">
+                            <h4 class="font-medium text-gray-700 mb-2">Recommendations</h4>
+                            <div id="recommendations" class="text-gray-600"></div>
+                            <div id="recommendations-confidence" class="text-sm text-gray-500 mt-2"></div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-md">
+                            <h4 class="font-medium text-gray-700 mb-2">Procedures</h4>
+                            <div id="procedures" class="text-gray-600"></div>
+                            <div id="procedures-confidence" class="text-sm text-gray-500 mt-2"></div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-md">
+                            <h4 class="font-medium text-gray-700 mb-2">Symptoms</h4>
+                            <div id="symptoms" class="text-gray-600"></div>
+                            <div id="symptoms-confidence" class="text-sm text-gray-500 mt-2"></div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-md">
+                            <h4 class="font-medium text-gray-700 mb-2">Tests</h4>
+                            <div id="tests" class="text-gray-600"></div>
+                            <div id="tests-confidence" class="text-sm text-gray-500 mt-2"></div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h3 class="text-lg font-semibold mb-2">Export Summary</h3>
+                        <div class="flex space-x-2">
+                            <button onclick="exportCurrentSummary('pdf')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                                <i class="fas fa-file-pdf mr-2"></i>Export as PDF
+                            </button>
+                            <button onclick="exportCurrentSummary('doc')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                                <i class="fas fa-file-word mr-2"></i>Export as DOC
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentHistoryIndex = -1;
+        let currentSummary = null;
+
+        function showLoading() {
+            document.getElementById('loading').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.add('hidden');
+        }
+
+        function summarizeText() {
+            const text = document.getElementById('medical-text').value;
+            if (!text) {
+                alert('Please enter medical text');
+                return;
+            }
+
+            showLoading();
+            fetch('/api/summarize', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: text })
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                displayResults(data);
+                loadHistory(); // Refresh history after successful summarization
+            })
+            .catch(error => {
+                hideLoading();
+                alert('Error processing text');
+                console.error('Error:', error);
+            });
+        }
+
+        function uploadFile() {
+            const fileInput = document.getElementById('file-upload');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('Please select a file');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            showLoading();
+            fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                displayResults(data);
+            })
+            .catch(error => {
+                hideLoading();
+                alert('Error uploading file');
+                console.error('Error:', error);
+            });
+        }
+
+        function displayResults(data) {
+            document.getElementById('summary').textContent = data.summary;
+            document.getElementById('highlighted-text').innerHTML = data.highlighted_text;
+            
+            // Display key information with confidence scores
+            for (const [category, items] of Object.entries(data.key_information)) {
+                const element = document.getElementById(category);
+                const confidenceElement = document.getElementById(`${category}-confidence`);
+                if (element && confidenceElement) {
+                    element.textContent = items.join('\n') || `No ${category} information found`;
+                    const confidence = data.confidence_scores[category];
+                    if (confidence) {
+                        confidenceElement.textContent = `Confidence: ${(confidence * 100).toFixed(1)}%`;
+                    }
+                }
+            }
+            
+            document.getElementById('results').classList.remove('hidden');
+        }
+
+        async function loadHistory() {
+            try {
+                const response = await fetch('/api/history');
+                const history = await response.json();
+                const historyList = document.getElementById('history-list');
+                historyList.innerHTML = '';
+
+                if (history.length === 0) {
+                    historyList.innerHTML = `
+                        <div class="text-center text-gray-500 py-4">
+                            <i class="fas fa-history text-3xl mb-2"></i>
+                            <p>No history available</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                history.forEach((entry, index) => {
+                    const date = new Date(entry.timestamp).toLocaleString();
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'bg-gray-50 p-4 rounded-md hover:bg-gray-100 cursor-pointer transition-all duration-300 border border-gray-200 hover:border-blue-300 hover:shadow-md';
+                    historyItem.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-file-medical text-blue-600 mr-2"></i>
+                                    <h3 class="font-medium text-gray-800 truncate">${entry.filename}</h3>
+                                </div>
+                                <p class="text-sm text-gray-500">${date}</p>
+                                <div class="mt-2 text-sm text-gray-600 line-clamp-2">${entry.summary}</div>
+                            </div>
+                            <div class="flex space-x-2 ml-4">
+                                <button onclick="event.stopPropagation(); exportHistoryEntry(${index})" class="text-blue-600 hover:text-blue-800" title="Export">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button onclick="event.stopPropagation(); deleteHistoryEntry(${entry.id})" class="text-red-600 hover:text-red-800" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    historyItem.onclick = () => displayHistoryEntry(entry);
+                    historyList.appendChild(historyItem);
+                });
+            } catch (error) {
+                console.error('Error loading history:', error);
+                const historyList = document.getElementById('history-list');
+                historyList.innerHTML = `
+                    <div class="text-center text-red-500 py-4">
+                        <i class="fas fa-exclamation-circle text-3xl mb-2"></i>
+                        <p>Error loading history</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function exportHistoryEntry(index) {
+            try {
+                const format = prompt('Enter export format (pdf, doc, or csv):', 'pdf');
+                if (!format) return;
+
+                const response = await fetch(`/api/export/${index}?format=${format.toLowerCase()}`);
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `summary_${index}.${format.toLowerCase()}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
+                } else {
+                    alert('Error exporting history entry');
+                }
+            } catch (error) {
+                console.error('Error exporting history entry:', error);
+                alert('Error exporting history entry');
+            }
+        }
+
+        async function deleteHistoryEntry(id) {
+            if (!confirm('Are you sure you want to delete this entry?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/delete_history/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    loadHistory();
+                } else {
+                    alert('Error deleting history entry');
+                }
+            } catch (error) {
+                console.error('Error deleting history entry:', error);
+                alert('Error deleting history entry');
+            }
+        }
+
+        function displayHistoryEntry(entry) {
+            currentSummary = {
+                summary: entry.summary,
+                key_information: entry.key_info,
+                highlighted_text: entry.highlighted_text
+            };
+            displayResults(currentSummary);
+        }
+
+        function exportCurrentSummary(format) {
+            if (!format) {
+                format = prompt('Enter export format (pdf, doc, or csv):', 'pdf');
+                if (!format) return;
+            }
+
+            const data = {
+                summary: document.getElementById('summary').textContent,
+                key_information: getKeyInformation(),
+                confidence_scores: getConfidenceScores()
+            };
+
+            fetch(`/api/export/current?format=${format.toLowerCase()}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                }
+                throw new Error('Export failed');
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `medical_summary.${format.toLowerCase()}`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            })
+            .catch(error => {
+                alert('Error exporting summary');
+                console.error('Error:', error);
+            });
+        }
+
+        function getKeyInformation() {
+            const keyInfo = {};
+            const categories = ['diagnosis', 'medications', 'recommendations', 'procedures', 'symptoms', 'tests'];
+            categories.forEach(category => {
+                const element = document.getElementById(category);
+                if (element) {
+                    keyInfo[category] = element.textContent.split('\n').filter(item => item.trim() !== '');
+                }
+            });
+            return keyInfo;
+        }
+
+        function getConfidenceScores() {
+            const scores = {};
+            const categories = ['diagnosis', 'medications', 'recommendations', 'procedures', 'symptoms', 'tests'];
+            categories.forEach(category => {
+                const element = document.getElementById(`${category}-confidence`);
+                if (element) {
+                    const match = element.textContent.match(/Confidence: ([\d.]+)%/);
+                    if (match) {
+                        scores[category] = parseFloat(match[1]) / 100;
+                    }
+                }
+            });
+            return scores;
+        }
+
+        // Load history on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadHistory();
+        });
+
+        // Add mobile menu functionality
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('open');
+        }
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuButton = event.target.closest('button');
+            
+            if (!mobileMenu.contains(event.target) && !menuButton) {
+                mobileMenu.classList.remove('open');
+            }
+        });
+
+        // Add scroll event listener for navbar background
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('dark');
+            } else {
+                nav.classList.remove('dark');
+            }
+        });
+
+        // Add active state to current page link
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html> 
